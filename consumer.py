@@ -1,5 +1,6 @@
 import json
 import websockets
+import traceback
 import lz4.frame
 
 class Consumer():
@@ -15,13 +16,13 @@ class Consumer():
     async def connect(self, wsuri):
         await self.stats_handler.add_consumer(self)
         headers = {"Cookie": "OpenSlidesSessionID=" + self.token}
-        self.connection = await websockets.connect(wsuri, extra_headers=headers)
+        self.connection = await websockets.connect(wsuri, max_size=None, extra_headers=headers)
 
     async def recv_task(self):
         try:
             await self._recv_task()
         except Exception as e:
-            print(e)
+            print("Error in consumer {}: {}\n{}".format(self.i, repr(e), traceback.format_exc()))
             self.error = True
 
     async def _recv_task(self):

@@ -29,7 +29,7 @@ class StatsHandler():
                     error += 1
                 else:
                     ok += 1
-            print(f"Consumers: {ok} OK, {error} errors")
+            print("Consumers: {} OK, {} errors".format(ok, error))
 
             # Change ids
             change_ids = defaultdict(lambda :0)
@@ -38,7 +38,7 @@ class StatsHandler():
             keys = sorted(list(change_ids.keys()), reverse=True)
             print("Change ids")
             for key in keys:
-                print(f"  {key}: {change_ids[key]}")
+                print("  {}: {}".format(key, change_ids[key]))
 
             # Message len stats
             await self.print_stats(self.stats, "All")
