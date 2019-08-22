@@ -5,7 +5,8 @@ import sys
 from stats import StatsHandler
 from consumer import Consumer
 
-class Main():
+
+class Main:
     def __init__(self, host, user, password, N, secure):
         self.host = host
         self.user = user
@@ -35,26 +36,19 @@ class Main():
         await asyncio.gather(*futures)
 
     async def login(self, url):
-        data = {
-            "username": self.user,
-            "password": self.password,
-        }
+        data = {"username": self.user, "password": self.password}
         async with aiohttp.ClientSession() as session:
             response = await session.post(url, json=data)
             return response.cookies["OpenSlidesSessionID"].value
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="WS-Receiver"
-    )
-    parser.add_argument(
-            "-i", help="Instance (url/Host)", default="localhost:8000"
-    )
+    parser = argparse.ArgumentParser(description="WS-Receiver")
+    parser.add_argument("-i", help="Instance (url/Host)", default="localhost:8000")
     parser.add_argument("-u", help="User", default="admin")
     parser.add_argument("-p", help="Password", default="admin")
     parser.add_argument("-N", help="No. of connections", default="10")
-    parser.add_argument('-s', help="secure connection", action='store_true')
+    parser.add_argument("-s", help="secure connection", action="store_true")
     args = parser.parse_args()
     try:
         N = int(args.N)

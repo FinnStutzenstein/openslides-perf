@@ -1,3 +1,4 @@
 websockets
 aiohttp
 lz4
+black

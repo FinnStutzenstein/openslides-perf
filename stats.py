@@ -2,7 +2,8 @@ import asyncio
 from collections import defaultdict
 import time
 
-class StatsHandler():
+
+class StatsHandler:
     stats = []
     stats_by_time = defaultdict(list)
     recv = 0
@@ -17,9 +18,13 @@ class StatsHandler():
             await self.clear_by_time()
 
             # Throughput
-            kb_per_sec = self.recv/1024
+            kb_per_sec = self.recv / 1024
             self.recv = 0
-            print("Throughput: {:.2f} kB/s ({:.2f} kbit/s)".format(kb_per_sec, kb_per_sec*8))
+            print(
+                "Throughput: {:.2f} kB/s ({:.2f} kbit/s)".format(
+                    kb_per_sec, kb_per_sec * 8
+                )
+            )
 
             # Consumer stats
             ok = 0
@@ -32,7 +37,7 @@ class StatsHandler():
             print("Consumers: {} OK, {} errors".format(ok, error))
 
             # Change ids
-            change_ids = defaultdict(lambda :0)
+            change_ids = defaultdict(lambda: 0)
             for consumer in self.consumers:
                 change_ids[consumer.change_id] += 1
             keys = sorted(list(change_ids.keys()), reverse=True)
@@ -58,7 +63,9 @@ class StatsHandler():
         recv = int(sum(s.message_len for s in list_of_stats) / 1024)
         recv_de = int(sum(s.decompressed_len for s in list_of_stats) / 1024)
         print("# {}".format(msg))
-        print("received {} messages; {} kB ({} kB decompressed)".format(N, recv, recv_de))
+        print(
+            "received {} messages; {} kB ({} kB decompressed)".format(N, recv, recv_de)
+        )
         print("ratio: mean={:.2f} std={:.2f}".format(mean, std))
 
     async def clear_by_time(self):
@@ -74,8 +81,9 @@ class StatsHandler():
         self.stats.append(stats)
         self.stats_by_time[t].append(stats)
 
-class Stats():
+
+class Stats:
     def __init__(self, message_len, decompressed_len):
         self.message_len = message_len
         self.decompressed_len = decompressed_len
-        self.ratio = float(decompressed_len)/message_len
+        self.ratio = float(decompressed_len) / message_len
