@@ -18,6 +18,7 @@ class Consumer:
     async def connect(self, wsuri):
         await self.stats_handler.add_consumer(self)
         headers = {"Cookie": "OpenSlidesSessionID=" + self.token}
+        print(self.i)
 
         success = False
         while not success:
@@ -30,7 +31,7 @@ class Consumer:
                     extra_headers=headers,
                 )
                 success = True
-            except websockets.exceptions.InvalidStatusCode:
+            except (websockets.exceptions.InvalidStatusCode, websockets.exceptions.InvalidMessage):
                 print("retry: {}".format(self.i))
                 await asyncio.sleep(0.1)
 
