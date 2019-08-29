@@ -17,23 +17,31 @@ class Consumer:
 
     async def connect(self, wsuri):
         await self.stats_handler.add_consumer(self)
-        headers = {"Cookie": "OpenSlidesSessionID=" + self.token}
         print(self.i)
 
         success = False
         while not success:
             try:
-                self.connection = await websockets.connect(
-                    wsuri,
-                    max_size=None,
-                    read_limit=2 ** 20,
-                    close_timeout=20,
-                    extra_headers=headers,
-                )
+                self.connection = await asyncio.wait_for(self.get_connection(wsuri), timeout=1)
+                if not self.connection:
+                    raise websockets.exceptions.InvalidMessage()  # Dummy
                 success = True
-            except (websockets.exceptions.InvalidStatusCode, websockets.exceptions.InvalidMessage):
+            except (websockets.exceptions.InvalidStatusCode, websockets.exceptions.InvalidMessage, asyncio.TimeoutError):
                 print("retry: {}".format(self.i))
                 await asyncio.sleep(0.1)
+
+    async def get_connection(self, wsuri):
+        headers = {"Cookie": "OpenSlidesSessionID=" + self.token}
+        try:
+            return await websockets.connect(
+                wsuri,
+                max_size=None,
+                read_limit=2 ** 20,
+                close_timeout=20,
+                extra_headers=headers,
+            )
+        except (websockets.exceptions.InvalidStatusCode, websockets.exceptions.InvalidMessage, asyncio.TimeoutError):
+            return None
 
     async def recv_task(self):
         try:
