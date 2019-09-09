@@ -1,4 +1,5 @@
 import asyncio
+import ssl
 import json
 import websockets
 import traceback
@@ -22,16 +23,24 @@ class Consumer:
         success = False
         while not success:
             try:
-                self.connection = await asyncio.wait_for(self.get_connection(wsuri), timeout=1)
+                self.connection = await asyncio.wait_for(
+                    self.get_connection(wsuri), timeout=1
+                )
                 if not self.connection:
                     raise websockets.exceptions.InvalidMessage()  # Dummy
                 success = True
-            except (websockets.exceptions.InvalidStatusCode, websockets.exceptions.InvalidMessage, asyncio.TimeoutError):
+            except (
+                websockets.exceptions.InvalidStatusCode,
+                websockets.exceptions.InvalidMessage,
+                asyncio.TimeoutError,
+            ):
                 print("retry: {}".format(self.i))
                 await asyncio.sleep(0.1)
 
     async def get_connection(self, wsuri):
         headers = {"Cookie": "OpenSlidesSessionID=" + self.token}
+        context = ssl.SSLContext()
+        context.verify_mode = ssl.CERT_NONE
         try:
             return await websockets.connect(
                 wsuri,
@@ -39,8 +48,14 @@ class Consumer:
                 read_limit=2 ** 20,
                 close_timeout=20,
                 extra_headers=headers,
+                ping_timeout=None,
+                ssl=context,
             )
-        except (websockets.exceptions.InvalidStatusCode, websockets.exceptions.InvalidMessage, asyncio.TimeoutError):
+        except (
+            websockets.exceptions.InvalidStatusCode,
+            websockets.exceptions.InvalidMessage,
+            asyncio.TimeoutError,
+        ):
             return None
 
     async def recv_task(self):

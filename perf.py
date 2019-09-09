@@ -23,6 +23,8 @@ class Main:
 
         stats_handler = StatsHandler()
         token = await self.login(url)
+        if not token:
+            return
         print("got token:", token)
 
         consumers = [Consumer(i, token, wsuri, stats_handler) for i in range(self.N)]
@@ -37,9 +39,14 @@ class Main:
 
     async def login(self, url):
         data = {"username": self.user, "password": self.password}
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(verify_ssl=False)
+        ) as session:
             response = await session.post(url, json=data)
-            return response.cookies["OpenSlidesSessionID"].value
+            try:
+                return response.cookies["OpenSlidesSessionID"].value
+            except KeyError:
+                print(await response.text())
 
 
 if __name__ == "__main__":
