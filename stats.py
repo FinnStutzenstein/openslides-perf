@@ -51,7 +51,7 @@ class StatsHandler:
             for value in self.stats_by_time.values():
                 stats_by_time.extend(value)
             await self.print_stats(stats_by_time, "Last 10 secs")
-            print("")
+            print("\n")
 
     async def print_stats(self, list_of_stats, msg):
         N = len(list_of_stats)

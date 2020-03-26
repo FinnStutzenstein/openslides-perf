@@ -40,7 +40,7 @@ class Main:
     async def login(self, url):
         data = {"username": self.user, "password": self.password}
         async with aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(verify_ssl=False)
+            connector=aiohttp.TCPConnector(ssl=False)
         ) as session:
             response = await session.post(url, json=data)
             try:
