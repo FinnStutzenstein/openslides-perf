@@ -5,6 +5,8 @@
 *.log
 *~
 
+secrets
+
 # Virtual Environment
 .virtualenv*/*
-.venv/*
+**/.venv/*
