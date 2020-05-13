@@ -1,0 +1,9 @@
+Users = 1000
+Hatch rate = 200
+Alle 1-5 sek ein /setpresence/
+Ein Browsertab mit Autoupdates offen
+
+scale   RPS
+2       40-50
+10      60-80
+50      30

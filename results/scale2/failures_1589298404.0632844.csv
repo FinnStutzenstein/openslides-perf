@@ -1,0 +1,3 @@
+"Method","Name","Error","Occurrences"
+"POST","/apps/users/setpresence/","not ok: 504",17
+"POST","/apps/users/setpresence/","ConnectionError",408
