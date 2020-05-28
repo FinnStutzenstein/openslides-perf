@@ -19,6 +19,8 @@ import (
     "github.com/gorilla/websocket"
 )
 
+var SSL = false
+
 func main() {
     N := getN()
     host, user, pw := getParams()
@@ -102,7 +104,11 @@ func client(quit chan int, recv chan Message, i int, jar http.CookieJar, host st
         }
         initialIteration = false
 
-        u := url.URL{Scheme: "wss", Host: host, Path: "/ws/", RawQuery: "autoupdate=true&change_id=0"}
+	scheme := "ws"
+	if SSL {
+	    scheme = "wss"
+	}
+        u := url.URL{Scheme: scheme, Host: host, Path: "/ws/", RawQuery: "autoupdate=true&change_id=0"}
         dialer := websocket.Dialer{
             Jar: jar,
             HandshakeTimeout: 10 * time.Second,
@@ -133,6 +139,7 @@ func client(quit chan int, recv chan Message, i int, jar http.CookieJar, host st
             for {
                 _, message, err := c.ReadMessage()
                 if err != nil {
+                    log.Println(err)
                     return
                 }
                 recv <- parseMessage(message, i)
@@ -186,12 +193,21 @@ type Message struct {
 func getSessionId(user, pw, host string) http.CookieJar {
     values := map[string]string{"username": user, "password": pw}
     payload, _ := json.Marshal(values)
-    loginUrl := "https://" + host + "/apps/users/login/"
-
-    tr := &http.Transport{
-        TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
+    scheme := "http"
+    if SSL {
+	scheme = "https"
     }
-    client := &http.Client{Transport: tr}
+    loginUrl := scheme + "://" + host + "/apps/users/login/"
+
+    var client *http.Client
+    if SSL {
+        tr := &http.Transport{
+            TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
+        }
+        client = &http.Client{Transport: tr}
+    } else {
+        client = &http.Client{}
+    }
     response, err := client.Post(loginUrl, "application/json", bytes.NewBuffer(payload))
     if (err != nil) {
         log.Fatal(err)
@@ -202,7 +218,7 @@ func getSessionId(user, pw, host string) http.CookieJar {
 
     // Ok. get the session id
     var jar http.CookieJar
-    cookieUrl := url.URL{Scheme: "https", Host: host, Path: "/"}
+    cookieUrl := url.URL{Scheme: scheme, Host: host, Path: "/"}
     jar, _ = cookiejar.New(nil)
     jar.SetCookies(&cookieUrl, response.Cookies())
     return jar

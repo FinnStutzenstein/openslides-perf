@@ -4,6 +4,8 @@
 *.swo
 *.log
 *~
+*.old
+go/go
 
 secrets
 
