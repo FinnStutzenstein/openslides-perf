@@ -1,12 +1,20 @@
 import json
+import sys
 from locust import HttpLocust, TaskSet, task, constant
 from requests.exceptions import ConnectionError
 
 USERS = list(range(1,5000))[::-1]
 
-MOTION_POLL_ID = 1
+MOTION_POLL_ID = 8
+
+# get amount of clients
+index = sys.argv.index("-c")
+AMOUNT = int(sys.argv[index + 1])
 
 class UserBehavior(TaskSet):
+    state = {
+        "amount_logged_in": 0
+    }
     def __init__(self, *args, **kwargs):
         self.id = USERS.pop()
         self.logged_in = False
@@ -30,6 +38,7 @@ class UserBehavior(TaskSet):
                         self.present = whoami["user"]["is_present"]
                         self.cookies = res.cookies
                         self.logged_in = True
+                        self.state["amount_logged_in"] += 1
                         res.success()
                 else:
                     res.failure(f"not ok: {res.status_code}")
@@ -40,17 +49,22 @@ class UserBehavior(TaskSet):
 
     def on_stop(self):
         USERS.append(self.id)
+        if self.logged_in:
+            self.state["amount_logged_in"] -= 1
 
     @task
     def vote(self):
         if not self.login():
             return
-        if not self.set_present():
+        if self.state["amount_logged_in"] != AMOUNT:
             return
+        #if not self.set_present():
+        #    return
         if self.has_voted:
             return
 
-        if self.request(f"/rest/motions/motion-poll/{MOTION_POLL_ID}/vote/", "Y"):
+        url = f"/rest/motions/motion-poll/{MOTION_POLL_ID}/vote/"
+        if self.request(url, "Y"):
             self.has_voted = True
 
     def set_present(self):
@@ -69,8 +83,8 @@ class UserBehavior(TaskSet):
                     res.success()
                     return True
                 else:
-                    print(res.content)
-                    res.failure(f"not ok: {res.status_code}")
+                    #print(res.content)
+                    res.failure(f"not ok: {res.status_code} {res.content}")
             except ConnectionError:
                 res.failure("ConnectionError")
         return False

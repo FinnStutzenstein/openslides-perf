@@ -6,6 +6,7 @@
 *~
 *.old
 go/go
+go-plus/go-plus
 
 secrets
 
