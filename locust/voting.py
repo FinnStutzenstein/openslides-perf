@@ -1,11 +1,11 @@
 import json
 import sys
-from locust import HttpLocust, TaskSet, task, constant
+from locust import HttpUser, TaskSet, task, constant
 from requests.exceptions import ConnectionError
 
 USERS = list(range(1,5000))[::-1]
 
-MOTION_POLL_ID = 8
+MOTION_POLL_ID = 5
 
 # get amount of clients
 index = sys.argv.index("-c")
@@ -103,6 +103,6 @@ class UserBehavior(TaskSet):
             catch_response=True,
             cookies=self.cookies)
 
-class WebsiteUser(HttpLocust):
-    task_set = UserBehavior
+class UserClass(HttpUser):
+    tasks = [UserBehavior]
     wait_time = constant(1)

@@ -29,6 +29,7 @@ func main() {
 	recv := make(chan Message)
 	for i := 0; i < N; i++ {
 		go client(quit, recv, i, jar, host)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	sumBytes := 0
@@ -98,6 +99,7 @@ func client(quit chan int, recv chan Message, i int, jar http.CookieJar, host st
 	initialIteration := true
 	for retry {
 		if !initialIteration {
+			time.Sleep(1 * time.Second)
 			log.Println(i, "retry after error")
 		}
 		initialIteration = false
@@ -109,7 +111,8 @@ func client(quit chan int, recv chan Message, i int, jar http.CookieJar, host st
 		client = &http.Client{Transport: tr, Jar: jar}
 		resp, err := client.Get("https://" + host + "/system/autoupdate")
 		if err != nil {
-			log.Fatal("dial: ", err)
+			log.Println("dial: ", err)
+			continue
 		}
 
 		done := make(chan struct{})

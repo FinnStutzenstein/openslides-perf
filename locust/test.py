@@ -1,7 +1,7 @@
 import json
 import string
 import random
-from locust import HttpLocust, TaskSet, between, task, constant
+from locust import HttpUser, TaskSet, between, task, constant
 from requests.exceptions import ConnectionError
 from locust.contrib.fasthttp import FastHttpLocust
 
@@ -132,7 +132,7 @@ class UserBehavior(TaskSet):
             catch_response=True,
             cookies=self.cookies)
 
-class WebsiteUser(HttpLocust):
-    task_set = UserBehavior
+class UserClass(HttpUser):
+    tasks = [UserBehavior]
     #wait_time = between(1, 5)
     wait_time = constant(2)
